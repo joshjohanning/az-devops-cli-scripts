@@ -19,18 +19,18 @@ $query=az boards query --wiql $wiql | ConvertFrom-Json
 
 ForEach($workitem in $query) {
     $links=az boards work-item relation show --id $workitem.id | ConvertFrom-Json
-    ForEach($link in $links) {
-        if($link.relations.rel -eq "Parent") {
-            $parentId=$link.relations.url.Split("/")[-1]
+    ForEach($link in $links.relations) {
+        if($link.rel -eq "Parent") {
+            $parentId=$link.url.Split("/")[-1]
             if($parentId -ne $newParentId) {
-                write-host "Unparenting" $link.id "from $parentId"
-                az boards work-item relation remove --id $link.id --relation-type "parent" --target-id $parentId --yes
+                write-host "Unparenting" $links.id "from $parentId"
+                az boards work-item relation remove --id $links.id --relation-type "parent" --target-id $parentId --yes
 
-                write-host "Parenting" $link.id "to $newParentId"
-                az boards work-item relation add --id $link.id --relation-type "parent" --target-id $newParentId
+                write-host "Parenting" $links.id "to $newParentId"
+                az boards work-item relation add --id $links.id --relation-type "parent" --target-id $newParentId
             }
             else {
-                write-host "Work item" $link.id "is already parented to $parentId"
+                write-host "Work item" $links.id "is already parented to $parentId"
             }
         }
     }
